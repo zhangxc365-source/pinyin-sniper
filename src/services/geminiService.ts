@@ -32,6 +32,20 @@ export const warmUpAudio = async (words: (string | Word)[]) => {
 };
 
 /**
+ * Resolves a URL based on the application's base path for GitHub Pages compatibility.
+ */
+export const resolveAudioUrl = (path: string) => {
+  if (!path) return '';
+  const baseUrl = (import.meta as any).env.BASE_URL;
+  // If baseline URL is / and path is /audio/..., return /audio/...
+  if (baseUrl === '/') return path;
+  
+  // Strip leading slash from path to avoid double slashes
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return `${baseUrl}${cleanPath}`;
+};
+
+/**
  * Plays audio for a given word using local .wav assets from the manifest.
  * NO FALLBACK TO AI per user request.
  */
@@ -40,18 +54,30 @@ export const speakWithGemini = async (input: string | Word) => {
   
   const text = typeof input === 'string' ? input : input.char;
   const level = typeof input === 'string' ? 1 : input.level;
+  const audioFromWord = typeof input === 'string' ? null : input.audio;
   
-  if (!text.trim()) return;
+  if (!text.trim() && !audioFromWord) return;
 
   const player = getAudioPlayer();
+
+  if (audioFromWord) {
+    const fullPath = resolveAudioUrl(audioFromWord);
+    try {
+      player.src = fullPath;
+      await player.play();
+      return;
+    } catch (e) {
+      console.warn(`Error playing custom audio field: ${fullPath}`, e);
+    }
+  }
 
   // Find the file in the manifest for the given level
   const levelFiles = AUDIO_MANIFEST[level] || [];
   const foundFile = levelFiles.find(f => f.includes(text));
 
   if (foundFile) {
-    const basePath = level === 1 ? '/' : `/YCT${level}/`;
-    const fullPath = `${basePath}${foundFile}`;
+    const basePath = level === 1 ? '' : `YCT${level}/`;
+    const fullPath = resolveAudioUrl(`${basePath}${foundFile}`);
     
     try {
       player.src = fullPath;

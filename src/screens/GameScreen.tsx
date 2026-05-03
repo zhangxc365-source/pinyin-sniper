@@ -62,7 +62,7 @@ export default function GameScreen({ settings, onFinish, onPause, onHome }: Game
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const speak = useCallback((word: Word) => {
+  const playAudio = useCallback((word: Word) => {
     speakWithGemini(word); 
   }, []);
 
@@ -90,7 +90,7 @@ export default function GameScreen({ settings, onFinish, onPause, onHome }: Game
     setCurrentWord(target);
     setShowHint(false);
     setSmartHint(null);
-    speak(target);
+    playAudio(target);
 
     let options: { content: string, pinyin: string, isCorrect: boolean }[] = [];
 
@@ -178,7 +178,7 @@ export default function GameScreen({ settings, onFinish, onPause, onHome }: Game
     }));
 
     setBalloons(newBalloons);
-  }, [vocab, reviewVocab, speak, settings.challengeMode]);
+  }, [vocab, reviewVocab, playAudio, settings.challengeMode]);
 
   // Initial Spawn
   useEffect(() => {
@@ -385,7 +385,7 @@ export default function GameScreen({ settings, onFinish, onPause, onHome }: Game
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => currentWord && speak(currentWord)}
+            onClick={() => currentWord && playAudio(currentWord)}
             className={`w-[120px] h-[120px] speaker-icon-immersive flex items-center justify-center ${isPaused ? 'opacity-50' : ''}`}
           >
             <Headphones className="w-14 h-14 text-ui-gold" />

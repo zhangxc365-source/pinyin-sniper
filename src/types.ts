@@ -9,6 +9,7 @@ export interface Word {
   mn: string;
   level: number; // 1 to 6
   lesson: number; // 1 to 12
+  audio?: string;
 }
 
 export type GameMode = 'SOLO' | 'PK';
