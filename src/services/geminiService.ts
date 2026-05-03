@@ -2,7 +2,27 @@ import { GoogleGenAI } from "@google/genai";
 import { Word } from "../types";
 import { AUDIO_MANIFEST } from "../data/audioManifest";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+/**
+ * Returns the Gemini client if a valid API key is available.
+ * Does not throw if the key is missing or initialization fails.
+ */
+const getGeminiClient = () => {
+  if (aiInstance) return aiInstance;
+  
+  try {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key || key === 'undefined' || key.trim() === '') {
+      return null;
+    }
+    aiInstance = new GoogleGenAI({ apiKey: key });
+    return aiInstance;
+  } catch (err) {
+    console.error("Failed to initialize Gemini AI client:", err);
+    return null;
+  }
+};
 
 // Global state
 let globalAudio: HTMLAudioElement | null = null;
@@ -97,6 +117,9 @@ export const speakWithGemini = async (input: string | Word) => {
 
 export const getSmartHint = async (char: string, pinyin: string, en: string) => {
   try {
+    const ai = getGeminiClient();
+    if (!ai) return `Think about "${en}"! (AI Hint Unavailable)`;
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `You are an encouraging Chinese teacher for kids. Give a very short (1 sentence) fun mnemonic or clue to help a child recognize the word "${char}" (${pinyin} - ${en}). No pinyin in the clue, just simple Chinese or English.`,
@@ -109,6 +132,9 @@ export const getSmartHint = async (char: string, pinyin: string, en: string) => 
 
 export const getGameAnalysis = async (wrongWords: {char: string, en: string}[], score: number) => {
   try {
+    const ai = getGeminiClient();
+    if (!ai) return "太棒了！继续加油学习！(AI Analysis Unavailable)";
+
     const wordList = wrongWords.map(w => w.char).join(', ');
     const prompt = wrongWords.length > 0 
       ? `The student scored ${score} but struggled with these words: ${wordList}. Give a short (max 40 words) encouraging and specific study tip in Chinese.`
