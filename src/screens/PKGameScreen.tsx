@@ -46,8 +46,8 @@ export default function PKGameScreen({ settings, onFinish, onHome }: PKGameScree
 
   const vocab = useMemo(() => getLessonWords(settings.level, settings.lesson), [settings.level, settings.lesson]);
 
-  const playAudio = useCallback((text: string) => {
-    speakWithGemini(text);
+  const playAudio = useCallback((input: Word | string) => {
+    speakWithGemini(input);
   }, []);
 
   const spawnBalloons = useCallback(() => {
@@ -65,7 +65,7 @@ export default function PKGameScreen({ settings, onFinish, onHome }: PKGameScree
     });
 
     setCurrentWord(target);
-    playAudio(target.char);
+    playAudio(target);
 
     let options: { content: string, pinyin: string, isCorrect: boolean }[] = [];
 
@@ -244,7 +244,7 @@ export default function PKGameScreen({ settings, onFinish, onHome }: PKGameScree
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4 bg-white/80 p-4 rounded-full shadow-2xl border-4 border-white backdrop-blur">
         <div className="text-2xl font-black text-sky-800">{timeLeft}s</div>
         <button 
-          onClick={() => playAudio(currentWord?.char || '')}
+          onClick={() => currentWord && playAudio(currentWord)}
           className="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center text-white"
         >
           <Headphones />

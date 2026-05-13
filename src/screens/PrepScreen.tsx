@@ -27,8 +27,8 @@ export default function PrepScreen({ settings, onStart, onBack }: PrepScreenProp
     onStart();
   };
 
-  const speak = (text: string) => {
-    speakWithGemini(text);
+  const speak = (word: Word) => {
+    speakWithGemini(word);
   };
 
   return (
@@ -53,7 +53,7 @@ export default function PrepScreen({ settings, onStart, onBack }: PrepScreenProp
                 layout
                 key={word.id}
                 className="bg-white p-6 rounded-[32px] shadow-sm border-2 border-white flex flex-col items-center justify-center text-center group cursor-pointer hover:border-sky-300 transition-all min-h-[160px]"
-                onClick={() => speak(word.char)}
+                onClick={() => speak(word)}
               >
                 <div className="text-3xl font-bold text-sky-600 mb-2">{word.pinyin}</div>
                 <div className="text-4xl font-black text-slate-800 mb-2 font-serif">{word.char}</div>
